@@ -31,4 +31,5 @@ if prompt := st.chat_input("Ask about MEE courses or OAU rules..."):
                     # If you forgot to upload the PDF to GitHub, it tells you here
                     st.error("No PDF found! Please upload your MEE Handbook to your GitHub repository.")
             except Exception as e:
-                st.error(f"Technical Error: {e}") dollars 
+                st.error(f"Technical Error: {e}")
+
