@@ -51,29 +51,38 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# --- SECTION 5: SMART SEARCH & LOGIC ---
-if prompt := st.chat_input("Ask about MEE 205 or Admission..."):
+# --- SECTION 5: MULTI-PDF LOGIC ---
+if prompt := st.chat_input("Ask about MEE 205, Further Maths, or Admission..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("Checking official records..."):
+        with st.spinner("Consulting the OAU Library..."):
             try:
-                # This finds any PDF in your folder automatically
+                # 1. Find ALL PDFs in the folder
                 all_files = os.listdir(".")
                 pdf_files = [f for f in all_files if f.lower().endswith(".pdf")]
                 
                 if pdf_files:
-                    target_pdf = pdf_files[0]
-                    doc = genai.upload_file(path=target_pdf)
-                    response = model.generate_content([doc, prompt])
+                    # 2. Prepare a list for the AI
+                    docs_to_send = []
+                    
+                    # 3. Upload every single PDF found
+                    for f in pdf_files:
+                        uploaded_doc = genai.upload_file(path=f)
+                        docs_to_send.append(uploaded_doc)
+                    
+                    # 4. Send all documents + the user's question to the brain
+                    # The AI will now cross-reference all files to find the answer
+                    response = model.generate_content(docs_to_send + [prompt])
+                    
                     st.markdown(response.text)
                     st.session_state.messages.append({"role": "assistant", "content": response.text})
                 else:
-                    st.error("No PDF found! Please upload your OAU Handbook to GitHub.")
+                    st.error("No PDFs found! Please upload your handbooks to GitHub.")
             except Exception as e:
-                st.error(f"Technical Error: {e}") 
+                st.error(f"Technical Error: {e}")
 # --- SECTION 6: FEEDBACK & DATA COLLECTION ---
 with st.sidebar:
     st.divider()
