@@ -74,3 +74,21 @@ if prompt := st.chat_input("Ask about MEE 205 or Admission..."):
                     st.error("No PDF found! Please upload your OAU Handbook to GitHub.")
             except Exception as e:
                 st.error(f"Technical Error: {e}") 
+# --- SECTION 6: FEEDBACK & DATA COLLECTION ---
+with st.sidebar:
+    st.divider()
+    st.subheader("Help Future Students 🚀")
+    st.write("Did you face an information gap that cost you? Tell us below.")
+    
+    # Text area for user input
+    user_problem = st.text_area("What info do you wish you had known?", placeholder="e.g., 'I didn't know MEE 205 required Further Maths'...")
+    
+    if st.button("Submit to OAU AI"):
+        if user_problem:
+            # For now, this just thanks the user. 
+            # In a pro version, we would save this to a database.
+            st.success("Thank you! Your experience will help the next generation.")
+            # LOGGING: This prints to your Streamlit Cloud logs so you can read them later!
+            print(f"USER FEEDBACK: {user_problem}")
+        else:
+            st.warning("Please type something before submitting.")
