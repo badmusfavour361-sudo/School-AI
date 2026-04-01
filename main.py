@@ -20,7 +20,7 @@ else:
     st.error("Missing API Key in Streamlit Secrets!")
 
 model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
+    model_name="gemini-1.5-flash-latest",
     system_instruction=(
         "You are the OAU AI Part Adviser. Use ONLY the provided PDF. "
         "If the answer is not in the PDF, say: 'I don't know, please consult your Part Adviser.' "
