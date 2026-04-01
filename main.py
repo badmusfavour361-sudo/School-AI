@@ -28,6 +28,15 @@ model = genai.GenerativeModel(
     )
 )
 
+# Temporary Debugging Code
+with st.sidebar:
+    st.write("Available Models:")
+    try:
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                st.write(m.name)
+    except Exception as e:
+        st.write(f"Could not list models: {e}")
 # 4. Display Chat History
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
