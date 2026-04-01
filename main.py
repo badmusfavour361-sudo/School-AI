@@ -1,49 +1,34 @@
 import streamlit as st
 import google.generativeai as genai
 import os
-
-# --- 1. BRANDING ---
-st.set_page_config(page_title="OAU AI", page_icon="🎓")
-st.title("OAU AI")
-st.markdown("### *The link to the right information*")
-st.divider()
-
-# --- 2. CONFIGURATION ---
-if "GOOGLE_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-else:
-    st.error("Missing API Key in Streamlit Secrets!")
-
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-pro",
-    system_instruction="You are the OAU AI Part Adviser. Use ONLY the provided PDF. If the answer isn't there, say: 'I don't know, please consult your Part Adviser.' Always cite the page number."
-)
-
-# --- 3. THE CHAT ---
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-if prompt := st.chat_input("Ask about MEE 205 or Admission..."):
+# 4. Input and Logic (Smart Search Version)
+if prompt := st.chat_input("Ask about MEE courses or OAU rules..."):
+    # Add user message to history
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("Checking official records..."):
+        with st.spinner("Searching for official documents..."):
             try:
-                # MAKE SURE YOUR PDF ON GITHUB IS NAMED EXACTLY THIS:
-                pdf_path = "mee_handbook.pdf" 
+                # 1. This looks through your GitHub folder for ANY PDF
+                all_files = os.listdir(".")
+                pdf_files = [f for f in all_files if f.lower().endswith(".pdf")]
                 
-                if os.path.exists(pdf_path):
-                    doc = genai.upload_file(path=pdf_path)
+                if pdf_files:
+                    # 2. It picks the first PDF it finds (no matter the name)
+                    target_pdf = pdf_files[0]
+                    
+                    # 3. It uploads that file to the AI 'Brain'
+                    doc = genai.upload_file(path=target_pdf)
+                    
+                    # 4. It asks the AI to answer based on that document
                     response = model.generate_content([doc, prompt])
+                    
                     st.markdown(response.text)
                     st.session_state.messages.append({"role": "assistant", "content": response.text})
                 else:
-                    st.error(f"Error: I can't find '{pdf_path}' in your GitHub files. Please check the name!")
+                    # If you forgot to upload the PDF to GitHub, it tells you here
+                    st.error("No PDF found! Please upload your MEE Handbook to your GitHub repository.")
             except Exception as e:
-                st.error(f"Technical Error: {e}")
+                st.error(f"Technical Error: {e}") dollars 
