@@ -30,7 +30,7 @@ try:
         selected_model = available_models[0]
         
     model = genai.GenerativeModel(
-        model_name=selected_model,
+        model_name=selected_model,)
         # --- SECTION 2: UPDATED SYSTEM INSTRUCTIONS ---
 model = genai.GenerativeModel(
     model_name=selected_model,
