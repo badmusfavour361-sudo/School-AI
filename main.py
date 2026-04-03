@@ -29,24 +29,38 @@ try:
     else:
         selected_model = available_models[0]
         
-        # --- SECTION 2: UPDATED SYSTEM INSTRUCTIONS ---
-model = genai.GenerativeModel(
-    model_name=selected_model,
-    system_instruction=(
-        "You are the OAU AI Part Adviser. Your goal is to close the information gap for students. "
-        "Use ONLY the provided PDFs to answer. If the answer is not in the PDFs, "
-        "say: 'I don't know, please consult your Part Adviser.' "
-        ""
-        "CRITICAL CITATION RULE: You must always mention the EXACT filename of the PDF "
-        "and the page number for every fact you provide. "
-        "Format: 'According to [Filename], Page [X]...' or 'Source: [Filename] (Page X)'."
+        # --- SECTION 2: AUTO-MODEL CONFIGURATION & BRAIN INSTRUCTIONS ---
+if "GOOGLE_API_KEY" in st.secrets:
+    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+else:
+    st.error("Missing API Key in Streamlit Secrets!")
+
+try:
+    # 1. Find the best model available
+    available_models = [
+        m.name for m in genai.list_models() 
+        if 'generateContent' in m.supported_generation_methods
+    ]
+    selected_model = 'models/gemini-1.5-flash' if 'models/gemini-1.5-flash' in available_models else available_models[0]
+        
+    # 2. Define the Brain's "Rules of Engagement"
+    model = genai.GenerativeModel(
+        model_name=selected_model,
+        system_instruction=(
+            "You are the OAU AI Part Adviser. Use ONLY the provided PDFs to answer. "
+            "If the answer is not in the PDFs, say: 'I don't know, please consult your Part Adviser.' "
+            ""
+            "CRITICAL CITATION RULE: You must always mention the EXACT filename of the PDF "
+            "and the page number for every fact you provide. "
+            "Format: 'According to [Filename], Page [X]...' or 'Source: [Filename] (Page X)'."
         )
     )
     with st.sidebar:
         st.success(f"Connected to: {selected_model}")
-except Exception as e:
-    st.error(f"Model initialization failed: {e}")
 
+except Exception as e:
+    # This is the 'except' block Python was looking for!
+    st.error(f"Model initialization failed: {e}")
 # --- SECTION 3: SESSION STATE ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
