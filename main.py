@@ -31,10 +31,17 @@ try:
         
     model = genai.GenerativeModel(
         model_name=selected_model,
-        system_instruction=(
-            "You are the OAU AI Part Adviser. Use ONLY the provided PDF. "
-            "If the answer is not in the PDF, say: 'I don't know, please consult your Part Adviser.' "
-            "Always cite the page number."
+        # --- SECTION 2: UPDATED SYSTEM INSTRUCTIONS ---
+model = genai.GenerativeModel(
+    model_name=selected_model,
+    system_instruction=(
+        "You are the OAU AI Part Adviser. Your goal is to close the information gap for students. "
+        "Use ONLY the provided PDFs to answer. If the answer is not in the PDFs, "
+        "say: 'I don't know, please consult your Part Adviser.' "
+        ""
+        "CRITICAL CITATION RULE: You must always mention the EXACT filename of the PDF "
+        "and the page number for every fact you provide. "
+        "Format: 'According to [Filename], Page [X]...' or 'Source: [Filename] (Page X)'."
         )
     )
     with st.sidebar:
