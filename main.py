@@ -89,3 +89,44 @@ with st.sidebar:
             print(f"INFORMATION GAP REPORTED: {user_problem}")
         else:
             st.warning("Please type your experience before submitting.")
+
+# --- SECTION 7: HIGH-SPEED CGPA CALCULATOR ---
+with st.sidebar:
+    st.divider()
+    st.subheader("⚡ Fast CGPA Calculator")
+    st.write("Paste your results below (Format: Course Unit Grade)")
+    st.caption("Example: MEE201 3 A, CSC201 2 B")
+    
+    raw_input = st.text_area("Enter results:", placeholder="MEE201 3 A...")
+    
+    if st.button("Calculate Now"):
+        if raw_input:
+            try:
+                # Mapping logic
+                grade_map = {'A': 5, 'B': 4, 'C': 3, 'D': 2, 'E': 1, 'F': 0}
+                total_units = 0
+                total_points = 0
+                
+                # Split input by commas or new lines
+                entries = raw_input.replace('\n', ',').split(',')
+                
+                for entry in entries:
+                    parts = entry.strip().split()
+                    if len(parts) >= 3:
+                        unit = int(parts[-2]) # Takes the second to last item
+                        grade = parts[-1].upper() # Takes the last item
+                        
+                        if grade in grade_map:
+                            total_units += unit
+                            total_points += (unit * grade_map[grade])
+                
+                if total_units > 0:
+                    cgpa = total_points / total_units
+                    st.metric("Your CGPA", f"{cgpa:.2f}")
+                    if cgpa >= 4.5: st.balloons()
+                else:
+                    st.error("Invalid format. Use: Course Unit Grade")
+            except Exception as e:
+                st.error("Error: Please check your formatting.")
+
+
