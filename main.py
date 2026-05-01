@@ -90,43 +90,54 @@ with st.sidebar:
         else:
             st.warning("Please type your experience before submitting.")
 
-# --- SECTION 7: HIGH-SPEED CGPA CALCULATOR ---
+# --- SECTION 7: CGPA CALCULATOR WITH GUIDANCE ---
 with st.sidebar:
     st.divider()
     st.subheader("⚡ Fast CGPA Calculator")
-    st.write("Paste your results below (Format: Course Unit Grade)")
-    st.caption("Example: MEE201 3 A, CSC201 2 B")
     
-    raw_input = st.text_area("Enter results:", placeholder="MEE201 3 A...")
+    # 1. Permanent Guide (Uses an expander to save space)
+    with st.expander("How to use?"):
+        st.write("Type or paste your results like this:")
+        st.code("MEE201 3 A\nMEE204 3 B")
+        st.caption("Format: [Course] [Units] [Grade]")
+
+    raw_input = st.text_area("Enter results:", placeholder="e.g. MEE204 3 A")
     
     if st.button("Calculate Now"):
         if raw_input:
             try:
-                # Mapping logic
                 grade_map = {'A': 5, 'B': 4, 'C': 3, 'D': 2, 'E': 1, 'F': 0}
                 total_units = 0
                 total_points = 0
+                lines = raw_input.strip().split('\n')
                 
-                # Split input by commas or new lines
-                entries = raw_input.replace('\n', ',').split(',')
-                
-                for entry in entries:
-                    parts = entry.strip().split()
-                    if len(parts) >= 3:
-                        unit = int(parts[-2]) # Takes the second to last item
-                        grade = parts[-1].upper() # Takes the last item
-                        
-                        if grade in grade_map:
-                            total_units += unit
-                            total_points += (unit * grade_map[grade])
-                
-                if total_units > 0:
+                error_found = False
+                for line in lines:
+                    parts = line.replace(',', ' ').split()
+                    
+                    # 2. Specific Check: Did they include all 3 parts?
+                    if len(parts) < 3:
+                        st.warning(f"⚠️ **Missing Info:** '{line}' needs a unit number. (Example: MEE204 **3** A)")
+                        error_found = True
+                        continue
+                    
+                    grade = parts[-1].upper()
+                    unit_str = parts[-2]
+                    
+                    if grade in grade_map and unit_str.isdigit():
+                        unit = int(unit_str)
+                        total_units += unit
+                        total_points += (unit * grade_map[grade])
+                    else:
+                        st.error(f"❌ **Format Error:** Check '{line}'. Use '3 A', '2 B', etc.")
+                        error_found = True
+
+                if total_units > 0 and not error_found:
                     cgpa = total_points / total_units
                     st.metric("Your CGPA", f"{cgpa:.2f}")
                     if cgpa >= 4.5: st.balloons()
-                else:
-                    st.error("Invalid format. Use: Course Unit Grade")
-            except Exception as e:
-                st.error("Error: Please check your formatting.")
-
-
+                elif not error_found:
+                    st.info("💡 **Quick Tip:** Paste your results: Course Name, then Unit, then Grade.")
+                    
+            except Exception:
+                st.error("Something went wrong. Please use the 'Course Unit Grade' format.")
